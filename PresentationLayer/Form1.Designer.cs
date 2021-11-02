@@ -618,7 +618,7 @@ namespace Grupp_28_RSS
             this.Controls.Add(this.tabReader);
             this.Name = "FrmAvsnitt";
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
-            this.Text = "Really Simple Syndication by Grupp 28 ";
+            this.Text = "<";
             this.Load += new System.EventHandler(this.FrmAvsnitt_Load);
             this.tabReader.ResumeLayout(false);
             this.tabPageNewsReader.ResumeLayout(false);
