@@ -24,7 +24,7 @@ namespace DataAccessLayer.Repositories
             {
                 avsnitt = (from x in rssfeedxml.Descendants("item")
 
-                               //Response.Write(list);  
+                               
                            select new Avsnitt
                            {
                                NewsTitel = x.Element("title").Value,
@@ -33,14 +33,11 @@ namespace DataAccessLayer.Repositories
 
                            }).ToList();
             }
-            catch (Exception)
+            catch (ExceptionHandler)
             {
 
-                throw;
+                throw new ExceptionHandler("Could not get new episodes");
             }
-
- 
-
 
  return avsnitt;
 

@@ -47,7 +47,6 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="ServiceFolder\AvsnittService.cs" />
     <Compile Include="ServiceFolder\KategoriService.cs" />
     <Compile Include="ServiceFolder\PodcastService.cs" />
   </ItemGroup>

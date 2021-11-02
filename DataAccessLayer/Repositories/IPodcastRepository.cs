@@ -17,7 +17,7 @@ namespace DataAccessLayer.Repositories
 
         void UpdateAllPodcastKategori(string oldKategori, string newKategori);
 
-        Task UpdatePodcastAvsnitt(List<Podcast> batch);
+        void UpdatePodcastAvsnitt(List<T> entity, DateTime timeStamp);
 
     }
 }

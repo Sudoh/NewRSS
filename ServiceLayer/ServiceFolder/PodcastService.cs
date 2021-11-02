@@ -33,6 +33,7 @@ namespace ServiceLayer.ServiceFolder
 
         public async Task DownloadPodcastAsync(string url, string namn, string kategori, int uppdateringsFrekvens)
         {
+            //Async, skapar en ny tråd där Podcast laddas ner för att inte "frysa" fönstret. 
             await Task.Run(() => DownloadPodcast(url, namn, kategori, uppdateringsFrekvens, DateTime.Now));
 
         }
@@ -102,11 +103,10 @@ namespace ServiceLayer.ServiceFolder
             
         }
 
-        public async Task DownloadNewAvsnittForPodcasts(List<Podcast> podcasts)
+        public async Task DownloadNewAvsnittForPodcasts(List<Podcast> podcasts, DateTime timeStamp)
         {
 
-            var listOfpodcasts = podcastRepository.GetAll();
-            await podcastRepository.UpdatePodcastAvsnitt(podcasts);
+            await Task.Run(() => podcastRepository.UpdatePodcastAvsnitt(podcasts, timeStamp));
 
         }
 
