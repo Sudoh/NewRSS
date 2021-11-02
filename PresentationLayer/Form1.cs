@@ -459,8 +459,13 @@ namespace Grupp_28_RSS
 
             //Fortsätter ange värden till olika text fält
             valdPodcastNamn = txtUppdateradPodcastNamn.Text;
-            valdPodcastKategori = cmbUppdateradKategori.SelectedItem.ToString();
-            valdPodcastIntervall = cmbUppdateradIntervall.SelectedIndex;
+            if (cmbUppdateradKategori != null)
+            {
+                valdPodcastKategori = cmbUppdateradKategori.SelectedItem.ToString();
+                valdPodcastIntervall = cmbUppdateradIntervall.SelectedIndex;
+            }
+            
+          
 
 
 
