@@ -10,6 +10,7 @@ using System.Threading.Tasks;
 using System.Windows.Forms;
 using modelss;
 using ServiceLayer.ServiceFolder;
+using Tulpep.NotificationWindow;
 
 namespace Grupp_28_RSS
 {
@@ -26,7 +27,7 @@ namespace Grupp_28_RSS
         private int valdPodcastIntervall;
 
         private Timer timer;
-        private readonly List<List<Podcast>> lista = new List<List<Podcast>>();
+        private readonly List<List<Podcast>> instervallLista = new List<List<Podcast>>();
         private readonly List<Podcast> Interval0 = new List<Podcast>();
         private readonly List<Podcast> Interval1 = new List<Podcast>();
         private readonly List<Podcast> Interval2 = new List<Podcast>();
@@ -35,6 +36,8 @@ namespace Grupp_28_RSS
         KategoriService kategoriService;
         AvsnittService avsnittService;
         PodcastService podcastService;
+
+        private readonly StartMsg startMsgVirtual = new StartMsgOverride();
 
 
         private static Validering validator = new Validering();
@@ -46,7 +49,7 @@ namespace Grupp_28_RSS
             avsnittService = new AvsnittService();
             podcastService = new PodcastService();
             validator = new Validering();
-
+            MessageBox.Show(startMsgVirtual.StartingMsg());
             CreateTimerData();
 
         }
@@ -165,51 +168,92 @@ namespace Grupp_28_RSS
             }
         }
 
-        
+        private void CreateInformationMessage(string message)
+        {
+            MessageBox.Show(message, "Title",
+            MessageBoxButtons.OK, MessageBoxIcon.Information);
+        }
 
         private void btnAndraNamnKategori_Click(object sender, EventArgs e)
         {
 
-            if (valdKategori != null)
+            if (!validator.TextBoxNotEmptyOrNull(txtNyKategori))
             {
-                kategoriService.RenameKategori(valdKategori, txtNyKategori.Text);
-                podcastService.UpdatePodcasts(valdKategori, txtNyKategori.Text);
-                //string nyNamn = txtNyKategori.Text;
-                //kategoriService.RenameKategori();
-              ClearAndReloadKategorieListAfterChange();
-              ClearAndReloadPodcastsListAfterChange(podcastService.GetAllPodcasts());
+
+                {
+                    if (valdKategori != null)
+                    {
+                        kategoriService.RenameKategori(valdKategori, txtNyKategori.Text);
+                        podcastService.UpdatePodcasts(valdKategori, txtNyKategori.Text);
+                        //string nyNamn = txtNyKategori.Text;
+                        //kategoriService.RenameKategori();
+                        ClearAndReloadKategorieListAfterChange();
+                        ClearAndReloadPodcastsListAfterChange(podcastService.GetAllPodcasts());
+                    }
+                }
+
             }
+            else
+            {
+                CreateInformationMessage("Please select a category to change the name of");
+            }
+
 
         }
 
         private void btnLaggTillKategori_Click(object sender, EventArgs e)
         {
-            if (txtNyKategori.Text != valdKategori && validator.CheckIfCategoryIsAvailable(txtNyKategori))
-            {
-                kategoriService.CreateKategori(txtNyKategori.Text);
-                txtNyKategori.Text = null;
-                ClearAndReloadKategorieListAfterChange();
-            }
 
+            if (!validator.TextBoxNotEmptyOrNull(txtNyKategori))
+            {
+
+
+
+                if (txtNyKategori.Text != valdKategori && validator.CheckIfCategoryIsAvailable(txtNyKategori))
+                {
+                    kategoriService.CreateKategori(txtNyKategori.Text);
+                    txtNyKategori.Text = "";
+                    ClearAndReloadKategorieListAfterChange();
+
+                    PopupNotifier popup = new PopupNotifier();
+                    popup.TitleText = "Notification";
+                    popup.ContentText = "You have just added new kategori to the kategorilist";
+                    popup.Popup();
+                }
+
+            }
+            else
+            {
+                CreateInformationMessage("Fill in kategiory name");
+            }
         }
+
+
 
         private void btnTaBortKategori_Click(object sender, EventArgs e)
         {
-            
-            DialogResult dialogResult = MessageBox.Show("Vill du ta bort kategori och alla podcast inom?", "Kategori manager", MessageBoxButtons.YesNo);
-         
-                if (lbxKategorier.SelectedItem != null && dialogResult == DialogResult.Yes)
+            if (!validator.TextBoxNotEmptyOrNull(txtNyKategori))
             {
+                DialogResult dialogResult = MessageBox.Show("Vill du ta bort kategori och alla podcast inom?", "Kategori manager", MessageBoxButtons.YesNo);
 
-                podcastService.DeletePodcastByKategori(lbxKategorier.SelectedItem.ToString());
+                if (lbxKategorier.SelectedItem != null && dialogResult == DialogResult.Yes)
+                {
 
-                kategoriService.DeleteKategori(lbxKategorier.SelectedItem.ToString());
-                txtNyKategori.Text = null;
-                ClearAndReloadKategorieListAfterChange();
-                ClearAndReloadPodcastsListAfterChange(podcastService.GetAllPodcasts());
+                    podcastService.DeletePodcastByKategori(lbxKategorier.SelectedItem.ToString());
+
+                    kategoriService.DeleteKategori(lbxKategorier.SelectedItem.ToString());
+                    txtNyKategori.Text = null;
+                    ClearAndReloadKategorieListAfterChange();
+                    ClearAndReloadPodcastsListAfterChange(podcastService.GetAllPodcasts());
+                }
+            }
+            else
+            {
+                CreateInformationMessage("Fill in kategiory name");
             }
 
         }
+
 
         private void lbxKategorier_SelectedIndexChanged(object sender, EventArgs e)
         {
@@ -245,32 +289,53 @@ namespace Grupp_28_RSS
 
         private async void btnLaggTillURL_Click(object sender, EventArgs e)
         {
-
-            //IF sats för att kolla om namn som läggs till inte är en dubblett. 
-            //Valt att använda ASYNC när vi lägger till en podcast ifall det skulle vara en stor podcast som "hänger" programmet. 
-
-            if (txtRSSURL.Text != "" && txtPodcastName != null && cmbIntervall.SelectedIndex != -1 && cmbKategori.SelectedIndex != -1)
+            if (validator.ValideraURL(txtRSSURL.Text))
             {
-                await podcastService.DownloadPodcastAsync(txtRSSURL.Text.ToString(), txtPodcastName.Text.ToString(), cmbKategori.SelectedItem.ToString(), Convert.ToInt32(cmbIntervall.SelectedIndex));
-                ClearAndReloadPodcastsListAfterChange(podcastService.GetAllPodcasts());
+                if (!validator.TextBoxNotEmptyOrNull(txtPodcastName))
+                {
+                    //IF sats för att kolla om namn som läggs till inte är en dubblett. 
+                    //Valt att använda ASYNC när vi lägger till en podcast ifall det skulle vara en stor podcast som "hänger" programmet. 
+                    if (validator.ComboBoxHasSelectedValue(cmbIntervall) && validator.ComboBoxHasSelectedValue(cmbKategori))
+                    {
+                        if (txtRSSURL.Text != "" && txtPodcastName != null)/*&& cmbIntervall.SelectedIndex != -1 && cmbKategori.SelectedIndex != -1)*/
+                        {
+                            await podcastService.DownloadPodcastAsync(txtRSSURL.Text.ToString(), txtPodcastName.Text.ToString(), cmbKategori.SelectedItem.ToString(), Convert.ToInt32(cmbIntervall.SelectedIndex));
+                            ClearAndReloadPodcastsListAfterChange(podcastService.GetAllPodcasts());
+                        }
+
+                        else
+                        {
+
+                            btnLaggTillURL.BackColor = Color.Red;
+                        }
+                    }
+                    else
+                    {
+                        CreateInformationMessage("Please select a value from the combobox");
+                    }
+                }
+                else
+                {
+                    CreateInformationMessage("Please insert a name into the textfield");
+                }
             }
             else
             {
-                 
-                btnLaggTillURL.BackColor = Color.Red;
+                CreateInformationMessage("Not a valid URL");
             }
-
 
 
             txtPodcastName.Text = "";
             txtRSSURL.Text = "";
             cmbIntervall.SelectedIndex = -1;
             cmbKategori.SelectedIndex = -1;
-           btnLaggTillURL.Enabled = false;
-           btnLaggTillURL.BackColor = Color.LightGray;
+            btnLaggTillURL.Enabled = false;
+            btnLaggTillURL.BackColor = Color.LightGray;
         }
 
-private void ClearNewsTextAfterChange()
+
+
+        private void ClearNewsTextAfterChange()
         {
             txtDescription.Text = "";
         }
@@ -282,19 +347,38 @@ private void ClearNewsTextAfterChange()
                 podcastService.DeletPodcast(lbxPodcastToDelete.SelectedItem.ToString());
                 ClearAndReloadKategorieListAfterChange();
             }
+            CreateTimerData();
             ClearAndReloadPodcastsListAfterChange(podcastService.GetAllPodcasts());
             ClearNewsTextAfterChange();
         }
 
         private void btnUppdateraFeed_Click(object sender, EventArgs e)
         {
-            podcastService.ChangePodcast(valdPodcastNamn, txtUppdateradPodcastNamn.Text, valdPodcastIntervall, cmbUppdateradIntervall.SelectedIndex, valdPodcastKategori, cmbUppdateradKategori.SelectedItem.ToString());
+
+            if (!validator.TextBoxNotEmptyOrNull(txtUppdateradPodcastNamn))
+            {
+                if (validator.ComboBoxHasSelectedValue(cmbUppdateradIntervall) && validator.ComboBoxHasSelectedValue(cmbUppdateradKategori))
+                {
+                    podcastService.ChangePodcast(valdPodcastNamn, txtUppdateradPodcastNamn.Text, valdPodcastIntervall, cmbUppdateradIntervall.SelectedIndex, valdPodcastKategori, cmbUppdateradKategori.SelectedItem.ToString());
 
 
-            ClearAndReloadPodcastsListAfterChange(podcastService.GetAllPodcasts());
-            btnUppdateraFeed.Enabled = false;
-            btnUppdateraFeed.BackColor = Color.LightGray;
+                    ClearAndReloadPodcastsListAfterChange(podcastService.GetAllPodcasts());
+                    btnUppdateraFeed.Enabled = false;
+                    btnUppdateraFeed.BackColor = Color.LightGray;
+                }
+                else
+                {
+                    CreateInformationMessage("Please select a value from the combobox");
+                }
+            }
+            else
+            {
+                CreateInformationMessage("Please input a new name");
+            }
+
+
         }
+
 
         private void lvFeed_SelectedIndexChanged(object sender, EventArgs e)
         {
@@ -423,7 +507,6 @@ private void ClearNewsTextAfterChange()
         private void tabPageNewsManager_Enter(object sender, EventArgs e)
         {
 
-
             ClearAndReloadPodcastManagerNameList();
 
         }
@@ -472,7 +555,7 @@ private void ClearNewsTextAfterChange()
         private void CreateTimerData()
         {
             List<Podcast> podcasts = podcastService.GetAllPodcasts();
-            int selectedInterval = 0;
+            int selectedInterval = 0;             
 
             foreach (Podcast podcast in podcasts)
             {
@@ -490,11 +573,11 @@ private void ClearNewsTextAfterChange()
                 }
             }
 
-            lista.Add(Interval0);
-            lista.Add(Interval1);
-            lista.Add(Interval2);
+            instervallLista.Add(Interval0);
+            instervallLista.Add(Interval1);
+            instervallLista.Add(Interval2);
 
-            for (int i = 0; i < lista.Count; i++)
+            for (int i = 0; i < instervallLista.Count; i++)
             {
                 switch (i + 1)
                 {
@@ -502,19 +585,18 @@ private void ClearNewsTextAfterChange()
                         selectedInterval = 10000;
                         break;
                     case 2:
-                        selectedInterval = 60000;
+                        selectedInterval = 38000;
                         break;
                     case 3:
-                        selectedInterval = 120000;
+                        selectedInterval = 632600;
                         break;
                 }
 
                 timer = new Timer
                 {
-
                     Interval = selectedInterval,
                     Enabled = true,
-                    Tag = lista[i],
+                    Tag = instervallLista[i],
                 };
 
                 if (canBind)
@@ -537,16 +619,16 @@ private void ClearNewsTextAfterChange()
 
         private async void BatchUpdate(List<Podcast> batch)
         {
-            var progress = new Progress<int>();
-                 
+           DateTime timeStamp = DateTime.Now;
+          
 
             if (batch.Count > 0)
             {
                 try
                 {
-                    txtStatus.Text += "Loading...";
-                    await podcastService.DownloadNewAvsnittForPodcasts(batch);
-                    txtStatus.Text += $"Uppdaterad.";
+                    txtStatus.Text += $"{timeStamp.ToShortTimeString()}: Påbörjar uppdatering.\r\n";
+                    await podcastService.DownloadNewAvsnittForPodcasts(batch, timeStamp);
+                    txtStatus.Text += $"{batch.Count}st.\r\n\n";
                     ClearAndReloadPodcastsListAfterChange(podcastService.GetAllPodcasts());
                 }
                 catch (Exception)

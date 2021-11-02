@@ -102,11 +102,10 @@ namespace ServiceLayer.ServiceFolder
             
         }
 
-        public async Task DownloadNewAvsnittForPodcasts(List<Podcast> podcasts)
+        public async Task DownloadNewAvsnittForPodcasts(List<Podcast> podcasts, DateTime timeStamp)
         {
 
-            var listOfpodcasts = podcastRepository.GetAll();
-            await podcastRepository.UpdatePodcastAvsnitt(podcasts);
+            await Task.Run(() => podcastRepository.UpdatePodcastAvsnitt(podcasts, timeStamp));
 
         }
 

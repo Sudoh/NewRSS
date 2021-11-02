@@ -154,7 +154,7 @@ namespace Grupp_28_RSS
             // colFeedSenastUppdaterad
             // 
             this.colFeedSenastUppdaterad.Text = "Senast uppdaterad";
-            this.colFeedSenastUppdaterad.Width = 110;
+            this.colFeedSenastUppdaterad.Width = 120;
             // 
             // lblTitelDescription
             // 

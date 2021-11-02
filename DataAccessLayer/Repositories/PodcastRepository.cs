@@ -103,18 +103,24 @@ namespace DataAccessLayer.Repositories
         }
 
 
-        public async Task UpdatePodcastAvsnitt(List<Podcast> batch)
+        public void UpdatePodcastAvsnitt(List<Podcast> entity, DateTime timeStamp)
         {
 
-            List<Avsnitt> nyaAvsnitt = new List<Avsnitt>();
+           
 
-            foreach (var item in batch)
+           for (int i = 0; i < entity.Count; i++)
             {
-                nyaAvsnitt = await Task.Run(() => feedDownloader.RssRead(item.URL));
-                item.AntalAvsnitt = 77;
-                item.datumTillaggd = DateTime.Now;
+                Podcast podcast = entity[i];
+
+                podcast.datumTillaggd = timeStamp;
+                podcast.Avsnitt = feedDownloader.RssRead(podcast.URL);
+
+               // await Task.Run(() => Update(GetIndex(entity[i].Namn), podcast));
+                Update(GetIndex(entity[i].Namn), podcast);
+
             }
-            SaveChanges();
+
         }
+
     }
 }
