@@ -21,7 +21,7 @@ namespace modelss
         //Tom kontruktor - för att klara krav om fler konstruktörer.
         public Kategori()
         {
-            KategoriNamn = "";
+            KategoriNamn = "Ny Kategori";
 
         }
     }

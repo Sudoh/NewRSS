@@ -34,7 +34,6 @@ namespace Grupp_28_RSS
         private bool canBind = true;
 
         KategoriService kategoriService;
-        AvsnittService avsnittService;
         PodcastService podcastService;
 
         private readonly StartMsg startMsgVirtual = new StartMsgOverride();
@@ -46,7 +45,6 @@ namespace Grupp_28_RSS
             InitializeComponent();
             valdKategori = null;
             kategoriService = new KategoriService();
-            avsnittService = new AvsnittService();
             podcastService = new PodcastService();
             validator = new Validering();
             MessageBox.Show(startMsgVirtual.StartingMsg());
@@ -185,8 +183,7 @@ namespace Grupp_28_RSS
                     {
                         kategoriService.RenameKategori(valdKategori, txtNyKategori.Text);
                         podcastService.UpdatePodcasts(valdKategori, txtNyKategori.Text);
-                        //string nyNamn = txtNyKategori.Text;
-                        //kategoriService.RenameKategori();
+
                         ClearAndReloadKategorieListAfterChange();
                         ClearAndReloadPodcastsListAfterChange(podcastService.GetAllPodcasts());
                     }
@@ -587,10 +584,10 @@ namespace Grupp_28_RSS
                 switch (i + 1)
                 {
                     case 1:
-                        selectedInterval = 10000;
+                        selectedInterval = 60120;
                         break;
                     case 2:
-                        selectedInterval = 38000;
+                        selectedInterval = 98000;
                         break;
                     case 3:
                         selectedInterval = 632600;

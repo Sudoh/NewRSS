@@ -95,7 +95,7 @@ namespace DataAccessLayer.Repositories
 
         public void UpdateAllPodcastKategori(string oldKategoriName, string newKategoriName)
         {
-            foreach (var  podcast in listOfPodcasts.Where(podcast => podcast.kategori.Equals(oldKategoriName)))
+            foreach (var podcast in listOfPodcasts.Where(podcast => podcast.kategori.Equals(oldKategoriName)))
             {
                 podcast.kategori = newKategoriName;
             }
